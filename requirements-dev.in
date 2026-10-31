@@ -1,0 +1,6 @@
+-r requirements.in
+pytest
+pytest-cov
+build
+setuptools>=68
+wheel

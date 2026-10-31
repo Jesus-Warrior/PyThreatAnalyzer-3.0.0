@@ -1,0 +1,36 @@
+# Configuración local (no debe subirse)
+config.local.json
+nsrl.local.json
+
+# Salidas de empaquetado
+dist/
+build/
+*.egg-info/
+*.whl
+
+# Bases de datos y logs generados
+analysis_cache.db
+analysis_cache.db-*
+*.log
+detections.log
+pythreatanalyzer.log
+
+# NSRL real (124 GB / 18 GB): se instala localmente
+*.sqlite
+*.sqlite3
+RDS*
+
+# Claves y firmas: nunca al repo
+*.asc
+*.gpg
+*.pem
+*.key
+
+# Python y herramientas
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/

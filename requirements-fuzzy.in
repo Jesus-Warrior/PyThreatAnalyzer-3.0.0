@@ -1,0 +1,5 @@
+# ssdeep requires libfuzzy headers/libraries on Linux. Keep its hash-locked
+# install separate so installations without the native library can still
+# use all other analysis layers.
+ssdeep==3.4 \
+    --hash=sha256:1b5510716bc495a2b18300ea837fcf944552a1cc678bb74e384bce251d99a85f

@@ -1,0 +1,45 @@
+PyThreatAnalyzer third-party data notices
+
+TweetFeed SHA-256 IOCs
+Source: https://github.com/0xDanielLopez/TweetFeed
+License: CC0-1.0 (as declared by upstream).
+Suggested attribution: “IOC data from TweetFeed (CC0)”. Imported snapshots are
+recent community-reported indicators, not a complete historical corpus. The
+snapshot URL, retrieval time, payload checksum and count are recorded in
+tweetfeed_meta.json when populated.
+
+PRX-SD Built-in YARA rules
+Source: https://github.com/openprx/prx-sd-signatures
+The upstream source table declares the Built-in sub-source MIT. The aggregate
+repository itself is Apache-2.0; its LICENSE and README are retained with the
+import. Only the Built-in YARA sub-source is selected. Full upstream commit and
+rule checksums are recorded in yara_rules/META.json. Upstream rule metadata uses
+the author name "prx-sd" but does not provide a separate copyright year or
+per-rule license file. The bundled notice records the MIT terms and identifies
+the upstream attribution as "prx-sd"; it is not a verbatim upstream copyright
+notice. Recheck the license interpretation before each update or broader
+redistribution.
+
+ReversingLabs YARA rules
+Official source: https://github.com/reversinglabs/reversinglabs-yara-rules
+License: MIT, as declared by the official upstream repository. Retain the
+upstream MIT copyright and permission notice with imported rules, together
+with full commit and rule checksums in yara_rules/META.json.
+
+NIST NSRL RDS
+Source: https://www.nist.gov/itl/csd/secure-systems-and-applications/national-software-reference-library-nsrl/nsrl-download-0
+NIST states the RDS is public domain and redistribution is free and encouraged;
+retain NIST attribution and identify modifications. The SQLite database is a
+local post-installation resource and is not redistributed in this project.
+Verify downloaded archives against NIST's published checksum. The local setup
+helper records the checksum of the extracted SQLite database in ignored local
+metadata.
+
+All imported data files are listed in checksums.txt. Hash matches and YARA
+matches are analysis signals; they do not replace analyst review.
+
+Legacy MalwareBazaar feed
+The project no longer includes a MalwareBazaar snapshot in its default
+distribution or active hash database. The legacy importer remains available
+for maintainers, requires an ABUSE_CH_KEY, and must not be used to redistribute
+data until the current upstream terms and authorization have been reviewed.

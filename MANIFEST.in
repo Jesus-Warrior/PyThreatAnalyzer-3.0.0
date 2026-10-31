@@ -1,0 +1,42 @@
+# Manifiesto para sdist desde el repositorio; el ZIP de distribución usa la lista de verificar_y_empaquetar.py.
+include README.md
+include SECURITY.md
+include pyproject.toml
+include pythreat_version.py
+include setup-data.sh
+include docs/data-sources.md
+include docs/cache-engine-version.md
+include docs/tests.md
+include CHANGELOG.md
+include malware_imphashes.txt
+include malware_tlsh.txt
+include malware_ssdeep.txt
+include .gitignore
+include config.json
+include malware_hashes.txt
+include requirements.in
+include requirements.txt
+include requirements-dev.in
+include requirements-dev.txt
+include requirements-fuzzy.in
+include requirements-o1-tested.txt
+include test_pythreatanalyzer.py
+include profile_analysis.py
+include MANIFEST.in
+include verificar_y_empaquetar.py
+recursive-include .github *.yml
+include scripts/check-consistency.sh
+include scripts/check-data-coverage.sh
+recursive-include data *
+include data/NOTICE
+include data/checksums.txt
+include scripts/update-data.py
+include scripts/update-data.sh
+include scripts/setup-data.sh
+include scripts/import-yara-rules.py
+include scripts/import-tweetfeed.py
+include scripts/import-prx-yara.py
+include scripts/fetch-prx-yara.py
+recursive-include tests/fixtures/coverage-seed *
+exclude config.local.json
+exclude nsrl.local.json

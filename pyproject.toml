@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pythreatanalyzer"
+dynamic = ["version"]
+description = "Análisis estático local de archivos potencialmente maliciosos"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "pefile",
+  "pyelftools",
+  "py7zr",
+  "rarfile",
+  "python-tlsh",
+  "yara-python",
+  "numpy",
+  "scikit-learn",
+  "skops",
+  "oletools",
+]
+
+[project.scripts]
+pythreatanalyzer = "cli:main"
+pythreatanalyzer-gui = "main:main"
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov", "build", "pip-tools"]
+fuzzy = ["ssdeep==3.4"]
+
+[tool.setuptools.dynamic]
+version = {attr = "pythreat_version.__version__"}
+
+[tool.setuptools]
+packages = ["pythreatanalyzer_data"]
+package-dir = {"pythreatanalyzer_data" = "data"}
+py-modules = [
+  "ai_detector", "analysis_cache", "analysis_utils", "app_logging",
+  "archive_analyzer", "cli", "document_analyzer", "dynamic_analyzer",
+  "explanation_engine", "file_type_detector", "import_fuzzy_hashes",
+  "config_loader", "analysis_engine",
+  "import_hashes", "main", "ml_detector", "report_generator",
+  "risk_levels", "risk_scoring", "script_analyzer", "threat_intel", "train_ml_model",
+  "update_yara_rules", "verificar_y_empaquetar", "virus_analyzer",
+  "yara_engine", "pythreat_version"
+]
+
+[tool.setuptools.package-data]
+pythreatanalyzer_data = [
+  "NOTICE", "checksums.txt", "allowlist/*", "denylist/*",
+  "yara_rules/**/*.yar", "yara_rules/**/*.yara", "yara_rules/**/*.json",
+  "yara_rules/**/*.txt"
+]
+
+[tool.setuptools.data-files]
+"." = ["config.json", "malware_hashes.txt", "malware_imphashes.txt",
+       "malware_tlsh.txt", "malware_ssdeep.txt"]
+
+[tool.pytest.ini_options]
+testpaths = ["."]
+python_files = ["test_pythreatanalyzer.py"]
+addopts = "--cov=analysis_utils --cov=analysis_cache --cov=archive_analyzer --cov=virus_analyzer --cov=ml_detector --cov-report=term-missing"

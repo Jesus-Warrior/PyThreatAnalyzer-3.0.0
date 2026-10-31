@@ -1,0 +1,16 @@
+{
+  "source": "TweetFeed",
+  "source_url": "https://tweetfeed.live/feeds/year.csv",
+  "license": "CC0-1.0",
+  "attribution": "IOC data from TweetFeed (CC0)",
+  "window": "year",
+  "downloaded_utc": "2026-10-29T16:25:40.937693+00:00",
+  "payload_sha256": "169ae4c1e816fa8a65f4fc65c25bfadab88032f1c0d1cf11818a78cf8ea7aa51",
+  "payload_bytes": 12323702,
+  "etag": "\"d56efb05bfc2d38d838c9510935447899b6cbc646399f46ae6c622647a481254\"",
+  "last_modified": null,
+  "rows_seen": 98126,
+  "invalid_sha256_rows": 0,
+  "unique_sha256_count": 2890,
+  "hashlist_sha256": "521e0bdb4d18b295919e3e4b3f900ee7fbd3bd87d4640d8963f739a5f6312209"
+}

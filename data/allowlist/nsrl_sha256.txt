@@ -1,0 +1,1 @@
+# Optional small/local allowlist, one SHA-256 per line. The NSRL SQLite is queried directly.

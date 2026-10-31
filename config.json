@@ -1,0 +1,18 @@
+{
+    "yara_rules_path": "data/yara_rules/",
+    "malware_hashes_db": "data/denylist/tweetfeed_sha256.txt",
+    "known_good_hashes_db": "data/allowlist/nsrl_sha256.txt",
+    "malware_imphashes_db": "malware_imphashes.txt",
+    "malware_tlsh_db": "malware_tlsh.txt",
+    "malware_ssdeep_db": "malware_ssdeep.txt",
+    "nsrl_db": null,
+    "ml_model_path": null,
+    "trusted_ml_model_sha256": null,
+    "log_format": "text",
+    "yara_timeout_seconds": 30,
+    "cache_db_path": "analysis_cache.db",
+    "cache_ttl_days": 30,
+    "trust_decay_days": 90,
+    "use_cache": true,
+    "max_member_analysis_seconds": 120.0
+}

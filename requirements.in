@@ -1,0 +1,10 @@
+pefile
+pyelftools
+py7zr
+rarfile
+python-tlsh
+yara-python
+numpy
+scikit-learn
+skops
+oletools

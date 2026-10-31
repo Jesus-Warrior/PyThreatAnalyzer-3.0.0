@@ -1,0 +1,9 @@
+Source repository: https://github.com/openprx/prx-sd-signatures
+Sub-source: yara/builtin
+Commit: 4c9c5977aa9058ec03b28602c37567bd0655cbe4
+Rule license declared in upstream README: MIT
+Upstream repository code license: Apache-2.0 (included separately)
+License table row: | PRX-SD Built-in | 64 | MIT | Active |
+Imported UTC: 2026-10-29T16:33:25.464190+00:00
+Compiled rule files: 12
+Compiled rule declarations: 64
