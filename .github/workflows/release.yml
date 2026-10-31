@@ -1,0 +1,143 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      publish_release:
+        description: Publish the GitHub Release after verification (leave false for a signed dry run)
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.12'
+      - name: Install test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfuzzy-dev build-essential
+          python -m pip install --require-hashes -r requirements-dev.txt -r requirements-fuzzy.in
+      - name: Check consistency
+        run: ./scripts/check-consistency.sh
+      - name: Ensure both fuzzy backends are available
+        run: python -c 'import tlsh, ssdeep'
+      - name: Build and validate ZIP
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            python verificar_y_empaquetar.py --tests --full --strict-data-coverage --zip-name PyThreatAnalyzer_${GITHUB_REF_NAME#v}.zip
+          else
+            python verificar_y_empaquetar.py --tests --full --zip-name PyThreatAnalyzer_${GITHUB_REF_NAME#v}.zip
+          fi
+      - name: Verify release ZIP inventory
+        run: |
+          python - <<'PY'
+          import zipfile
+          with zipfile.ZipFile('PyThreatAnalyzer_' + __import__('os').environ['GITHUB_REF_NAME'].removeprefix('v') + '.zip') as z:
+              names = z.namelist()
+              assert names[0] == 'PyThreatAnalyzer/'
+              assert {n.split('/', 1)[0] for n in names} == {'PyThreatAnalyzer'}
+          PY
+      - name: Create checksum and signature
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          test -n "$GPG_PRIVATE_KEY"
+          printf '%s' "$GPG_PRIVATE_KEY" | gpg --batch --import
+          zip="PyThreatAnalyzer_${GITHUB_REF_NAME#v}.zip"
+          sha256sum "$zip" > "$zip.sha256"
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$GPG_PASSPHRASE" --armor --detach-sign "$zip"
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$GPG_PASSPHRASE" --armor --detach-sign "$zip.sha256"
+      - name: Verify generated signatures and signer identity
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GPG_PUBLIC_KEY: ${{ vars.GPG_PUBLIC_KEY }}
+          GPG_FINGERPRINT: ${{ vars.GPG_FINGERPRINT }}
+        run: |
+          set -euo pipefail
+          test -n "$GPG_PUBLIC_KEY"
+          test -n "$GPG_FINGERPRINT"
+          printf '%s' "$GPG_PUBLIC_KEY" | gpg --batch --import
+          zip="PyThreatAnalyzer_${GITHUB_REF_NAME#v}.zip"
+          gpg --batch --status-fd 1 --verify "$zip.sha256.asc" "$zip.sha256" 2>/dev/null | python -c 'import os,sys; lines=[x.split() for x in sys.stdin if "[GNUPG:] VALIDSIG " in x]; fp=os.environ["GPG_FINGERPRINT"].replace(" ", "").upper(); primary=lines[0][11] if len(lines)==1 and len(lines[0])>11 else (lines[0][2] if len(lines)==1 else ""); assert primary.upper()==fp, "checksum signer fingerprint mismatch"'
+          sha256sum --check "$zip.sha256"
+          gpg --batch --status-fd 1 --verify "$zip.asc" "$zip" 2>/dev/null | python -c 'import os,sys; lines=[x.split() for x in sys.stdin if "[GNUPG:] VALIDSIG " in x]; fp=os.environ["GPG_FINGERPRINT"].replace(" ", "").upper(); primary=lines[0][11] if len(lines)==1 and len(lines[0])>11 else (lines[0][2] if len(lines)==1 else ""); assert primary.upper()==fp, "ZIP signer fingerprint mismatch"'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: pythreatanalyzer-release
+          path: |
+            PyThreatAnalyzer_*.zip
+            PyThreatAnalyzer_*.zip.sha256
+            PyThreatAnalyzer_*.zip.sha256.asc
+            PyThreatAnalyzer_*.zip.asc
+          retention-days: 30
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish_release))
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: pythreatanalyzer-release
+      - name: Verify checksum, GPG signer, version, inventory, and safe extraction
+        env:
+          GPG_PUBLIC_KEY: ${{ vars.GPG_PUBLIC_KEY }}
+          GPG_FINGERPRINT: ${{ vars.GPG_FINGERPRINT }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          test -n "$GPG_PUBLIC_KEY"
+          test -n "$GPG_FINGERPRINT"
+          printf '%s' "$GPG_PUBLIC_KEY" | gpg --batch --import
+          zip="PyThreatAnalyzer_${RELEASE_TAG#v}.zip"
+          gpg --batch --status-fd 1 --verify "$zip.sha256.asc" "$zip.sha256" 2>/dev/null | python -c 'import os,re,sys; lines=[x.split() for x in sys.stdin if "[GNUPG:] VALIDSIG " in x]; fp=os.environ["GPG_FINGERPRINT"].replace(" ", "").upper(); assert len(lines)==1, "expected one checksum VALIDSIG status"; primary=lines[0][11] if len(lines[0])>11 else lines[0][2]; assert primary.upper()==fp, "checksum signer fingerprint mismatch"'
+          sha256sum --check "$zip.sha256"
+          status="$(gpg --batch --status-fd 1 --verify "$zip.asc" "$zip" 2>/dev/null)"
+          printf '%s\n' "$status" | python -c 'import os,re,sys; lines=[x.split() for x in sys.stdin if "[GNUPG:] VALIDSIG " in x]; fp=os.environ["GPG_FINGERPRINT"].replace(" ", "").upper(); assert re.fullmatch(r"[0-9A-F]{40}|[0-9A-F]{64}", fp), "GPG_FINGERPRINT must be a primary fingerprint"; assert len(lines)==1, "expected one VALIDSIG status"; primary=lines[0][11] if len(lines[0])>11 else lines[0][2]; assert primary.upper()==fp, "VALIDSIG primary fingerprint mismatch"'
+          python - <<'PY'
+          import os, pathlib, tomllib, zipfile
+          from packaging.version import Version
+          archive = pathlib.Path('PyThreatAnalyzer_' + os.environ['RELEASE_TAG'].removeprefix('v') + '.zip')
+          expected_version = os.environ['RELEASE_TAG'].removeprefix('v')
+          with zipfile.ZipFile(archive) as z:
+              infos = z.infolist()
+              names = [i.filename for i in infos]
+              assert names[0] == 'PyThreatAnalyzer/'
+              assert len(infos) <= 10000 and sum(i.file_size for i in infos) <= 512 * 1024 * 1024
+              assert len(names) == len(set(names))
+              assert {n.split('/', 1)[0] for n in names if n} == {'PyThreatAnalyzer'}
+              for i in infos:
+                  p = pathlib.PurePosixPath(i.filename)
+                  assert not p.is_absolute() and '..' not in p.parts
+                  assert not (i.external_attr >> 16) & 0o170000 == 0o120000
+              z.extractall('release')
+          root = pathlib.Path('release/PyThreatAnalyzer')
+          import sys
+          sys.path.insert(0, str(root))
+          import pythreat_version
+          assert pythreat_version.__version__ == expected_version
+          assert Version(expected_version).major == 3
+          import verificar_y_empaquetar as pack
+          assert pack.phase_manifest_zip(names, str(root)), 'C4 ZIP inventory validation failed'
+          PY
+      - name: Publish GitHub release
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish_release)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: gh release create "$RELEASE_TAG" PyThreatAnalyzer_*.zip PyThreatAnalyzer_*.zip.sha256 PyThreatAnalyzer_*.zip.sha256.asc PyThreatAnalyzer_*.zip.asc --generate-notes
