@@ -9,10 +9,14 @@ Use Python 3.11–3.13. The committed locks include transitive dependencies and 
 ```sh
 python -m venv .venv
 . .venv/bin/activate
-python -m pip install --require-hashes -r requirements.txt -r requirements-fuzzy.in
+python -m pip install --require-hashes -r requirements.txt
+python -m pip install "setuptools<81"
+python -m pip install --no-build-isolation --require-hashes -r requirements-fuzzy.in
 ```
 
-For development and tests, run `python -m pip install --require-hashes -r requirements-dev.txt -r requirements-fuzzy.in`. On Debian/Ubuntu, `ssdeep` also needs `libfuzzy-dev` (`sudo apt-get install libfuzzy-dev`). `requirements.in` is the reviewed core dependency input; regenerate the lock with `uv pip compile --universal --generate-hashes requirements.in -o requirements.txt`. The `ssdeep` source is pinned by version and the SHA-256 hash recorded in `requirements-fuzzy.in`; review dependency changes before committing them.
+`ssdeep` 3.4 is distributed only as source and its `setup.py` imports `pkg_resources`, which recent `setuptools` releases no longer ship. It is therefore installed with `setuptools<81` and without build isolation. This leaves `setuptools` in the 80 series in that environment (the development lock pins 84.0.0); it is only a build tool and does not affect analysis. The `fuzzy` extra has the same limitation.
+
+For development and tests, run `python -m pip install --require-hashes -r requirements-dev.txt` and then install `ssdeep` with the two commands above. On Debian/Ubuntu, `ssdeep` also needs `libfuzzy-dev` (`sudo apt-get install libfuzzy-dev`). `requirements.in` is the reviewed core dependency input; regenerate the lock with `uv pip compile --universal --generate-hashes requirements.in -o requirements.txt`. The `ssdeep` source is pinned by version and the SHA-256 hash recorded in `requirements-fuzzy.in`; review dependency changes before committing them.
 
 ## Use
 

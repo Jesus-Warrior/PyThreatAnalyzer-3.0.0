@@ -3,7 +3,6 @@ name: Release
 on:
   push:
     tags: ['v*']
-  pull_request:
   workflow_dispatch:
     inputs:
       publish_release:
@@ -27,7 +26,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libfuzzy-dev build-essential
-          python -m pip install --require-hashes -r requirements-dev.txt -r requirements-fuzzy.in
+          python -m pip install --require-hashes -r requirements-dev.txt
+          # ssdeep 3.4 solo compila con setuptools<81 (usa pkg_resources)
+          python -m pip install "setuptools<81"
+          python -m pip install --no-build-isolation --require-hashes -r requirements-fuzzy.in
       - name: Check consistency
         run: ./scripts/check-consistency.sh
       - name: Ensure both fuzzy backends are available
@@ -85,7 +87,7 @@ jobs:
           retention-days: 30
 
   publish:
-    if: startsWith(github.ref, 'refs/tags/') && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish_release))
+    if: startsWith(github.ref, 'refs/tags/') && github.event_name == 'workflow_dispatch' && inputs.publish_release
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -136,7 +138,7 @@ jobs:
           assert pack.phase_manifest_zip(names, str(root)), 'C4 ZIP inventory validation failed'
           PY
       - name: Publish GitHub release
-        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish_release)
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_release
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.ref_name }}

@@ -36,9 +36,13 @@ expected = {*(f'M{i}' for i in range(1, 6)), *(f'B{i}' for i in range(1, 8)),
             *(f'K{i}' for i in range(6, 10)), 'N1', 'N2'}
 assert ids == expected, f'changelog IDs mismatch: missing={expected-ids}, extra={ids-expected}'
 assert len(found_ids) == 24 and len(set(found_ids)) == 24, 'each of the 24 changelog IDs must appear once'
-for p in pathlib.Path('.').rglob('*.py'):
+SKIP_DIRS = {'.git', '.venv', 'venv', 'env', 'dist', 'build', '__pycache__',
+             '.pytest_cache', '.mypy_cache', 'node_modules'}
+def walk(pattern):
+    return (p for p in pathlib.Path('.').rglob(pattern) if not SKIP_DIRS.intersection(p.parts))
+for p in walk('*.py'):
     assert 'v2.0.0' not in p.read_text(encoding='utf-8', errors='replace'), f'old version reference in {p}'
-for p in pathlib.Path('.').rglob('*'):
+for p in walk('*'):
     if not p.is_file() or p.name == 'CHANGELOG.md' or p == pathlib.Path('scripts/check-consistency.sh'):
         continue
     try:

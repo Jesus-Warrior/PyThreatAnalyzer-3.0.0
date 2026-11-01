@@ -18,6 +18,21 @@ En Linux, `ssdeep` requiere la biblioteca nativa antes de instalar el paquete:
 sudo apt-get install libfuzzy-dev build-essential
 ```
 
+`ssdeep` 3.4 solo se distribuye como código fuente y su `setup.py` importa
+`pkg_resources`, que las versiones recientes de `setuptools` ya no incluyen.
+Por eso se instala en dos pasos, con `setuptools<81` y sin aislamiento de
+compilación (CI y release hacen lo mismo):
+
+```sh
+python -m pip install --require-hashes -r requirements-dev.txt
+python -m pip install "setuptools<81"
+python -m pip install --no-build-isolation --require-hashes -r requirements-fuzzy.in
+```
+
+Esto deja `setuptools` en la serie 80 en ese entorno (el lock de desarrollo
+fija 84.0.0). Es solo una herramienta de compilación y no afecta al análisis.
+El extra `fuzzy` tiene la misma limitación.
+
 TLSH (`python-tlsh`) forma parte de las dependencias principales del proyecto;
 el extra `fuzzy` agrega ssdeep. Comprueba ambos imports con
 `python -c 'import tlsh, ssdeep'` y ejecuta `python -m pytest`.
