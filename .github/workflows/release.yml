@@ -28,6 +28,8 @@ jobs:
           sudo apt-get install -y libfuzzy-dev build-essential
           python -m pip install --require-hashes -r requirements-dev.txt
           # ssdeep 3.4 solo compila con setuptools<81 (usa pkg_resources)
+          # six va primero: el setup.py de ssdeep lo importa al generar metadatos
+          python -m pip install --require-hashes -r requirements-fuzzy-build.txt
           python -m pip install "setuptools<81"
           python -m pip install --no-build-isolation --require-hashes -r requirements-fuzzy.in
       - name: Check consistency

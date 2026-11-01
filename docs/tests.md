@@ -25,6 +25,8 @@ compilación (CI y release hacen lo mismo):
 
 ```sh
 python -m pip install --require-hashes -r requirements-dev.txt
+# six va primero: el setup.py de ssdeep lo importa al generar metadatos
+python -m pip install --require-hashes -r requirements-fuzzy-build.txt
 python -m pip install "setuptools<81"
 python -m pip install --no-build-isolation --require-hashes -r requirements-fuzzy.in
 ```

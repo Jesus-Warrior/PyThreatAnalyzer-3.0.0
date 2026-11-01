@@ -10,6 +10,8 @@ Use Python 3.11–3.13. The committed locks include transitive dependencies and 
 python -m venv .venv
 . .venv/bin/activate
 python -m pip install --require-hashes -r requirements.txt
+# six va primero: el setup.py de ssdeep lo importa al generar metadatos
+python -m pip install --require-hashes -r requirements-fuzzy-build.txt
 python -m pip install "setuptools<81"
 python -m pip install --no-build-isolation --require-hashes -r requirements-fuzzy.in
 ```

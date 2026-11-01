@@ -19,6 +19,7 @@ include requirements.txt
 include requirements-dev.in
 include requirements-dev.txt
 include requirements-fuzzy.in
+include requirements-fuzzy-build.txt
 include requirements-o1-tested.txt
 include test_pythreatanalyzer.py
 include profile_analysis.py
