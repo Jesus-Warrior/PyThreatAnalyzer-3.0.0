@@ -4,7 +4,7 @@ PyThreatAnalyzer performs local static analysis of files. It does not execute sc
 
 ## Requirements and installation
 
-Use Python 3.11–3.13. The committed locks include transitive dependencies and hashes. `ssdeep` is a separately locked optional feature because its source distribution needs native `libfuzzy` headers on Linux. Install it in a clean virtual environment:
+Use Python 3.12–3.13. The committed locks include transitive dependencies and hashes. `ssdeep` is a separately locked optional feature because its source distribution needs native `libfuzzy` headers on Linux. Install it in a clean virtual environment:
 
 ```sh
 python -m venv .venv

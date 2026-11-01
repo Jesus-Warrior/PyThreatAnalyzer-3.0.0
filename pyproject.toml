@@ -7,7 +7,7 @@ name = "pythreatanalyzer"
 dynamic = ["version"]
 description = "Análisis estático local de archivos potencialmente maliciosos"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
   "pefile",
   "pyelftools",
