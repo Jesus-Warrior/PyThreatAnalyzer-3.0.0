@@ -26,16 +26,27 @@ Threat-data ingestion is opt-in. Keep `ABUSE_CH_KEY` in the environment only; ne
 
 Release automation checks the SHA-256 sidecar before extraction and verifies the detached GPG signature. Configure Actions secret `GPG_PRIVATE_KEY` and `GPG_PASSPHRASE`, plus Actions variables `GPG_PUBLIC_KEY` and `GPG_FINGERPRINT`. The accepted signer is pinned to the configured **primary key fingerprint**; verification must report a GnuPG `VALIDSIG` status and its primary fingerprint must match the pin. A signing subkey is accepted only when GnuPG reports the pinned primary fingerprint. Rotate the pin only after independently authenticating the new primary fingerprint, then update the repository secret and signing key together. ZIP extraction rejects absolute paths, parent traversal, unexpected top-level roots, symlinks, and bundles exceeding the configured entry-count or uncompressed-size limits. On Windows, where ownership checks are unavailable, do not extract releases into directories writable by untrusted users and inspect reparse points/symlinks before trusting the extracted tree.
 
-### Release-signing readiness
+### Release-signing key
 
-The real primary-key fingerprint is not published here yet. Before release,
-verify that the local `gpg --fingerprint` value matches the GitHub Actions
-variable `GPG_FINGERPRINT`, then add that verified value to this document.
-Keep signing verification open until a `workflow_dispatch` dry-run with the
-real configured key successfully verifies both detached signatures and the
-signer's primary fingerprint. The ZIP and checksum should remain workflow
-artifacts during that dry-run; publish a GitHub release only in the explicitly
-authorized publishing run.
+Release ZIP files and their SHA-256 sidecars are signed with a detached GPG
+signature. The primary-key fingerprint is:
+
+```
+69C1 1E55 7CF2 0CC9 B3C2 C2CA A91A 7A5A A603 461C
+```
+
+Before trusting a release, import the public key, confirm that
+`gpg --fingerprint` shows exactly the fingerprint above, and verify both
+signatures and the checksum:
+
+```sh
+gpg --verify PyThreatAnalyzer_X.Y.Z.zip.sha256.asc PyThreatAnalyzer_X.Y.Z.zip.sha256
+sha256sum --check PyThreatAnalyzer_X.Y.Z.zip.sha256
+gpg --verify PyThreatAnalyzer_X.Y.Z.zip.asc PyThreatAnalyzer_X.Y.Z.zip
+```
+
+A "Good signature" from a different fingerprint must be rejected. The release
+workflow performs the same fingerprint comparison before publishing.
 
 ## Log directory
 
