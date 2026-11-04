@@ -137,7 +137,7 @@ jobs:
           assert pythreat_version.__version__ == expected_version
           assert Version(expected_version).major == 3
           import verificar_y_empaquetar as pack
-          assert pack.phase_manifest_zip(names, str(root)), 'C4 ZIP inventory validation failed'
+          assert pack.phase_manifest_zip(names, str(root), full=True), 'C4 ZIP inventory validation failed'
           PY
       - name: Publish GitHub release
         if: github.event_name == 'workflow_dispatch' && inputs.publish_release
